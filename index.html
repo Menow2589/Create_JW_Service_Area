@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>区域作成</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/html2canvas@1.3.2/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet-image@0.4.0/leaflet-image.js"></script>
+
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <dialog id="favDialog" style="width: 100vw; height: 95vh">
+      <div class="others">
+        <div class="image-container">
+          <img id="captured-image" alt="Captured Image" class="imgs" />
+        </div>
+        <div class="half-circle-spinner">
+          <div class="circle circle-1"></div>
+          <div class="circle circle-2"></div>
+        </div>
+
+        <script src="capture.js"></script>
+        <div
+          id="capture-area"
+          style="
+            position: fixed;
+            z-index: 9999;
+            border: 2px dashed #ccc;
+            display: none;
+            pointer-events: none;
+          "
+        ></div>
+        <div class="side">
+          <form action="" method="get">
+            <button onclick="resetImg()" value="cancel" formmethod="dialog" class="buttons">
+              Cancel
+            </button>
+          </form>
+          <button id="clearButton" class="buttons">マークを全削除</button>
+          <button onclick="wrap()" class="buttons">キャプチャの向き：縦</button>
+          <button onclick="side()" class="buttons">キャプチャの向き：横</button>
+          <button id="start-capture" class="buttons">キャプチャ開始</button>
+          <input type="text" id="area-no" class="input-area-no" placeholder="区域番号を入力">
+        </div>
+      </div>
+    </dialog>
+
+    <div class="others">
+      <div id="capture">
+        <div id="map"></div>
+        <script src="index.js"></script>
+      </div>
+      <div>
+        <a href="#" class="buttons" onclick="clearPolylines()"
+          >描画内容をクリア</a
+        ><br />
+        <a class="buttons" onclick="decision()">入力を確定</a><br />
+        <select id="select" class="select"></select>
+        <button id="capture-btn" class="buttons">キャプチャする</button>
+        <button id="showDialog" class="buttons">Show the dialog</button>
+      </div>
+    </div>
+
+    <script>
+      let imgData;
+      let imgElement;
+      let isDialogOpen;
+      let apartNo = 0;
+      var Element = document.getElementById("select");
+      for (var i = 1; i <= 10; i++) {
+        var option = document.createElement("option");
+        option.value = i;
+        option.innerText = "線の太さを変更(px) : " + i;
+        Element.appendChild(option);
+      }
+
+      var select = document.getElementById("select");
+      select.onchange = function () {
+        lineWeight = this.value;
+      };
+
+      const showButton = document.getElementById("showDialog");
+      const favDialog = document.getElementById("favDialog");
+
+      function wrap() {
+        captureMode = 0;
+      }
+
+      function side() {
+        captureMode = 1;
+      }
+
+      function resetImg() {
+        //console.log("resetImg!");
+        imgElement = document.getElementById("captured-image");
+        imgElement.src = "";
+        imgElement.style.display = "none"; // 画像を非表示にする
+      }
+
+      showButton.addEventListener("click", () => {
+        if (isDialogOpen === false || isDialogOpen !== true) {
+          alert("キャプチャデータが存在しません。");
+        } else if (isDialogOpen === true) {
+          favDialog.showModal();
+        }
+      });
+
+      favDialog.addEventListener("close", (e) => {
+        isDialogOpen = false;
+        favDialog.returnValue === "default"
+          ? "No return value."
+          : `ReturnValue: ${favDialog.returnValue}.`;
+      });
+
+      // スピナーの表示制御を追加
+      const spinner = document.querySelector('.half-circle-spinner');
+
+      function showSpinner() {
+        spinner.style.display = 'block';
+      }
+
+      function hideSpinner() {
+        spinner.style.display = 'none';
+      }
+
+      // キャプチャボタンのイベントリスナーを修正
+      document.getElementById("capture-btn").addEventListener("click", async function () {
+        showSpinner();
+        isDialogOpen = true;
+        
+        try {
+          await new Promise((resolve, reject) => {
+            leafletImage(map, function (err, canvas) {
+              if (err) {
+                reject(err);
+                return;
+              }
+              
+              const ctx = canvas.getContext("2d");
+              ctx.strokeStyle = color;
+              ctx.lineWidth = lineWeight;
+
+              const latlngs = polyline.getLatLngs();
+              
+              // パスを一度に描画
+              ctx.beginPath();
+              latlngs.forEach((latlng, index) => {
+                const point = map.latLngToContainerPoint(latlng);
+                if (index === 0) {
+                  ctx.moveTo(point.x, point.y);
+                } else {
+                  ctx.lineTo(point.x, point.y);
+                }
+              });
+              ctx.stroke();
+
+              imgData = canvas.toDataURL("image/png", 1.0); // 品質を0.8に設定
+              imgElement = document.getElementById("captured-image");
+              imgElement.src = imgData;
+              imgElement.style.display = "block";
+              
+              resolve();
+            });
+          });
+        } catch (error) {
+          console.error('キャプチャ処理でエラーが発生しました:', error);
+        } finally {
+          hideSpinner();
+        }
+      });
+
+      //キーが押されているか判定
+      let isKeyPressed = false;
+
+      // 左シフトキーが押されているか判定
+      let isKeyPressedShift = false;
+
+      // キーが押されたときのイベントリスナー
+      document.addEventListener('keydown', (event) => {
+        //console.log(event.code);
+          if (event.code === 'Space') {
+            isKeyPressed = true;
+          } else if (event.code === 'ShiftLeft') {
+            isKeyPressedShift = true;
+          }
+      });
+
+      // キーが離されたときのイベントリスナー
+      document.addEventListener('keyup', (event) => {
+          if (event.code === 'Space') {
+            isKeyPressed = false;
+          } else if (event.code === 'ShiftLeft') {
+            isKeyPressedShift = false;
+          }
+      });
+
+      const imageContainer = document.querySelector('.image-container');
+
+      imageContainer.addEventListener('click', (event) => {
+          if (isKeyPressed) {
+              const rect = imageContainer.getBoundingClientRect();
+              const x = event.clientX - rect.left - 10;
+              const y = event.clientY - rect.top - 15;
+
+              const cross = document.createElement('div');
+              cross.classList.add('cross');
+              cross.style.left = `${x}px`;
+              cross.style.top = `${y}px`;
+              cross.textContent = '⚠';
+
+              imageContainer.appendChild(cross);
+          }
+      });
+
+      imageContainer.addEventListener('click', (event) => {
+          if (isKeyPressedShift) {
+              const rect = imageContainer.getBoundingClientRect();
+              const x = event.clientX - rect.left - 10;
+              const y = event.clientY - rect.top - 15;
+              apartNo++;
+
+              const cross = document.createElement('div');
+              cross.classList.add('cross');
+              cross.style.left = `${x}px`;
+              cross.style.top = `${y}px`;
+              cross.style.fontSize = '20px';
+              cross.textContent = `A${apartNo}`;
+
+              imageContainer.appendChild(cross);
+          }
+      });
+
+      // すべてのマークを消すボタンのイベントリスナー
+      const clearButton = document.getElementById('clearButton');
+      clearButton.addEventListener('click', () => {
+          const crosses = document.querySelectorAll('.cross');
+          crosses.forEach(cross => cross.remove());
+          apartNo = 0;
+      });
+    </script>
+  </body>
+</html>

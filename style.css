@@ -1,0 +1,179 @@
+/*style.css*/
+
+.side {
+  max-width: 190px;
+  min-width: 170px;
+
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.buttons {
+  width: 90%;
+  margin-bottom: 10px;
+  display: inline-block;
+  color: #fff;
+  padding: 10px 10px;
+
+  background-color: #2f4f4f;
+  color: #fff;
+  padding: 10px 10px;
+  text-decoration: none;
+  font-size: 1em;
+
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.buttons:hover {
+  color: #fff;
+  opacity: 0.8;
+  background-position: right center;
+}
+
+.input-area-no {
+  width: 100%;
+  margin-bottom: 10px;
+  display: inline-block;
+  color: #fff;
+  padding: 10px 5px;
+
+  background-color: #2f4f4f;
+  color: #fff;
+  padding: 10px 5px;
+  text-decoration: none;
+  font-size: 1em;
+
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.select {
+  background-color: #2f4f4f;
+  color: #fff;
+  text-decoration: none;
+  font-size: 1em;
+  margin-bottom: 20px;
+  height: 40px;
+
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.others {
+  display: flex;
+  justify-content: flex-end;
+
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.items {
+  width: 18vw;
+
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+#map {
+  height: 95vh;
+  width: 92vw;
+
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.image-container {
+  position: relative;
+  display: inline-block;
+}
+.cross {
+  position: absolute;
+  color: red;
+  font-size: 24px;
+  pointer-events: none;
+  z-index: 19999; /* 画像の上に表示するためのz-index */
+
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.imgs {
+  position: relative;
+  display: none;
+  pointer-events: none;
+  height: 100%;
+  z-index: 9999;
+
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.leaflet-container {
+  position: relative;
+  z-index: 1; /* 地図を前面に */
+}
+
+.leaflet-polyline {
+  /*position: relative;*/
+  z-index: 2; /* Polylineを前面に */
+}
+
+.half-circle-spinner,
+.half-circle-spinner * {
+  box-sizing: border-box;
+}
+
+.half-circle-spinner {
+  width: 60px;
+  height: 60px;
+  border-radius: 100%;
+  position: absolute;
+  margin-right: 92vw; /* 中央寄せ */
+}
+
+.half-circle-spinner .circle {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 100%;
+  border: calc(60px / 10) solid transparent;
+}
+
+.half-circle-spinner .circle.circle-1 {
+  border-top-color: #ff1d5e;
+  animation: half-circle-spinner-animation 1s infinite;
+}
+
+.half-circle-spinner .circle.circle-2 {
+  border-bottom-color: #ff1d5e;
+  animation: half-circle-spinner-animation 1s infinite alternate;
+}
+
+@keyframes half-circle-spinner-animation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
