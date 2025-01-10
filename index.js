@@ -31,9 +31,6 @@ let polylines = [];
 document.addEventListener('DOMContentLoaded', () => {
   map = L.map('map').setView([lat, long], 15);
 
-  map.options.zoomSnap = 0.4;
-
-
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution:
       '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
