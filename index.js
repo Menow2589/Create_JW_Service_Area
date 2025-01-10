@@ -29,7 +29,9 @@ let polylines = [];
 );*/
 
 document.addEventListener('DOMContentLoaded', () => {
-  map = L.map("map").setView([lat, long], 15);
+  map = L.map("map", {
+    wheelPxPerZoomLevel: 10
+  }).setView([lat, long], 15);
 
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution:
